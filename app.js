@@ -262,7 +262,7 @@
     var t = String(tagText).toLowerCase();
     if (t === 'windows') return '🪟';
     if (t === 'linux') return '🐧';
-    if (t === 'macos') return '';
+    if (t === 'macos') return '🍎';
     if (t === 'android') return '🤖';
     return null;
   }
