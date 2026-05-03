@@ -1,0 +1,155 @@
+[
+  {
+    "name": "7-Zip",
+    "category": "Архіватори",
+    "description": "Безкоштовний архіватор з відкритим кодом. Висока ступінь стиснення, підтримка багатьох форматів (7z, ZIP, RAR, TAR тощо).",
+    "download": "https://www.7-zip.org/download.html",
+    "website": "https://www.7-zip.org/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Archive"]
+  },
+  {
+    "name": "WinRAR",
+    "category": "Архіватори",
+    "description": "Популярний архіватор з підтримкою формату RAR, високим стисненням і надійним відновленням архівів.",
+    "download": "https://www.win-rar.com/download.html",
+    "website": "https://www.win-rar.com/",
+    "guide": "",
+    "tags": ["Windows", "Trial", "Archive"]
+  },
+  {
+    "name": "Discord",
+    "category": "Комунікація",
+    "description": "Месенджер для голосового, відео та текстового спілкування. Спільноти, сервери, голосові канали для геймерів і команд.",
+    "download": "https://discord.com/download",
+    "website": "https://discord.com/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Chat", "Voice"]
+  },
+  {
+    "name": "Steam",
+    "category": "Ігри",
+    "description": "Найбільший ігровий лаунчер і магазин ігор від Valve. Бібліотека, спільнота, оновлення та хмарні збереження.",
+    "download": "https://store.steampowered.com/about/",
+    "website": "https://store.steampowered.com/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Launcher", "Games"]
+  },
+  {
+    "name": "Telegram Desktop",
+    "category": "Комунікація",
+    "description": "Швидкий і безпечний месенджер з підтримкою хмарних чатів, каналів, ботів і секретних розмов.",
+    "download": "https://desktop.telegram.org/",
+    "website": "https://telegram.org/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Chat"]
+  },
+  {
+    "name": "Google Chrome",
+    "category": "Браузери",
+    "description": "Швидкий браузер від Google з підтримкою синхронізації, розширень та сучасних веб-стандартів.",
+    "download": "https://www.google.com/chrome/",
+    "website": "https://www.google.com/chrome/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Browser"]
+  },
+  {
+    "name": "Mozilla Firefox",
+    "category": "Браузери",
+    "description": "Відкритий браузер з акцентом на приватність та безпеку. Підтримує синхронізацію, контейнери та розширення.",
+    "download": "https://www.mozilla.org/firefox/new/",
+    "website": "https://www.mozilla.org/firefox/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Browser", "Privacy"]
+  },
+  {
+    "name": "VLC Media Player",
+    "category": "Мультимедіа",
+    "description": "Універсальний медіаплеєр, що відтворює майже будь-які формати відео та аудіо без додаткових кодеків.",
+    "download": "https://www.videolan.org/vlc/",
+    "website": "https://www.videolan.org/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Media"]
+  },
+  {
+    "name": "OBS Studio",
+    "category": "Мультимедіа",
+    "description": "Безкоштовна програма для запису екрана та трансляцій. Підтримує сцени, мікшер аудіо та плагіни.",
+    "download": "https://obsproject.com/download",
+    "website": "https://obsproject.com/",
+    "guide": "https://obsproject.com/wiki/",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Streaming", "Recording"]
+  },
+  {
+    "name": "Visual Studio Code",
+    "category": "Розробка",
+    "description": "Сучасний редактор коду від Microsoft з підтримкою розширень, налагодження, Git та терміналу.",
+    "download": "https://code.visualstudio.com/Download",
+    "website": "https://code.visualstudio.com/",
+    "guide": "https://code.visualstudio.com/docs",
+    "tags": ["Windows", "Linux", "Free", "Editor", "IDE"]
+  },
+  {
+    "name": "Git",
+    "category": "Розробка",
+    "description": "Розподілена система контролю версій. Стандарт індустрії для роботи з кодом та спільної розробки.",
+    "download": "https://git-scm.com/downloads",
+    "website": "https://git-scm.com/",
+    "guide": "https://git-scm.com/doc",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "VCS", "CLI"]
+  },
+  {
+    "name": "Notepad++",
+    "category": "Розробка",
+    "description": "Легкий текстовий редактор для Windows з підсвіткою синтаксису багатьох мов програмування.",
+    "download": "https://notepad-plus-plus.org/downloads/",
+    "website": "https://notepad-plus-plus.org/",
+    "guide": "",
+    "tags": ["Windows", "Free", "Open Source", "Editor"]
+  },
+  {
+    "name": "NVIDIA App",
+    "category": "Драйвери",
+    "description": "Офіційний застосунок NVIDIA з драйверами GeForce, оптимізацією ігор, ShadowPlay та налаштуваннями GPU.",
+    "download": "https://www.nvidia.com/en-us/software/nvidia-app/",
+    "website": "https://www.nvidia.com/",
+    "guide": "",
+    "tags": ["Windows", "Free", "Driver", "GPU", "NVIDIA"]
+  },
+  {
+    "name": "AMD Software: Adrenalin Edition",
+    "category": "Драйвери",
+    "description": "Офіційний пакет драйверів і утиліт AMD для відеокарт Radeon — налаштування графіки, запис, оптимізація ігор.",
+    "download": "https://www.amd.com/en/support",
+    "website": "https://www.amd.com/",
+    "guide": "",
+    "tags": ["Windows", "Free", "Driver", "GPU", "AMD"]
+  },
+  {
+    "name": "qBittorrent",
+    "category": "Утиліти",
+    "description": "Легкий і швидкий торрент-клієнт з відкритим кодом. Без реклами, з вбудованим пошуком і RSS.",
+    "download": "https://www.qbittorrent.org/download",
+    "website": "https://www.qbittorrent.org/",
+    "guide": "",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Torrent"]
+  },
+  {
+    "name": "Bitwarden",
+    "category": "Безпека",
+    "description": "Менеджер паролів з відкритим кодом. Шифрування end-to-end, синхронізація між пристроями, генератор паролів.",
+    "download": "https://bitwarden.com/download/",
+    "website": "https://bitwarden.com/",
+    "guide": "https://bitwarden.com/help/",
+    "tags": ["Windows", "Linux", "Free", "Open Source", "Security", "Passwords"]
+  },
+  {
+    "name": "Malwarebytes",
+    "category": "Безпека",
+    "description": "Антивірус і антишпигун для виявлення та видалення шкідливого ПЗ. Доступна безкоштовна версія для сканування.",
+    "download": "https://www.malwarebytes.com/mwb-download",
+    "website": "https://www.malwarebytes.com/",
+    "guide": "",
+    "tags": ["Windows", "Free", "Trial", "Security", "Antivirus"]
+  }
+]

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Software Hub — каталог корисного софту, утиліт і посилань для швидкого встановлення." />
+  <meta name="color-scheme" content="dark light" />
+  <title>Software Hub</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">⌘</span>
+        <div class="brand-text">
+          <h1>Software Hub</h1>
+          <p>Каталог корисного софту, утиліт і посилань для швидкого встановлення</p>
+        </div>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Перемкнути тему">
+        <span class="theme-icon" aria-hidden="true">🌙</span>
+        <span class="theme-label">Тема</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="warning-card" role="note" aria-label="Попередження">
+      <div class="warning-icon" aria-hidden="true">!</div>
+      <div class="warning-text">
+        <strong>Увага:</strong> сайт містить посилання на сторонні ресурси. Завантажуйте програми тільки з офіційних сайтів. Не використовуйте піратський або зламаний софт.
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Пошук та фільтри">
+      <div class="search-row">
+        <label for="search" class="visually-hidden">Пошук</label>
+        <input
+          id="search"
+          type="search"
+          class="search-input"
+          placeholder="Пошук за назвою, описом, категорією або тегом…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="results-count" id="results-count" aria-live="polite"></span>
+      </div>
+
+      <div id="categories" class="categories" role="tablist" aria-label="Категорії"></div>
+    </section>
+
+    <section id="cards" class="cards-grid" aria-label="Список програм"></section>
+
+    <p id="empty-state" class="empty-state" hidden>Нічого не знайдено</p>
+    <p id="error-state" class="error-state" hidden>Не вдалося завантажити каталог. Спробуйте оновити сторінку.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Software Hub — особистий каталог корисного софту</p>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
