@@ -90,6 +90,32 @@ body {
   border: 0;
 }
 
+/* Skip-to-content: видимий лише при фокусі з клавіатури. */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
+  transform: translateY(-120%);
+  transition: transform var(--transition);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+#main:focus {
+  outline: none;
+}
+
 /* Header
    -------------------------------------------------------------------------- */
 .site-header {
@@ -359,8 +385,22 @@ body {
   border-radius: var(--radius-pill);
   background: var(--tag-bg);
   color: var(--tag-text);
+  font: inherit;
   font-size: 12px;
   border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.tag:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.tag:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .tag[data-kind="os-windows"],
@@ -416,6 +456,20 @@ body {
   color: #fff;
 }
 
+/* Search match highlight
+   -------------------------------------------------------------------------- */
+mark {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+[data-theme="light"] mark {
+  color: var(--accent-strong);
+}
+
 /* States
    -------------------------------------------------------------------------- */
 .empty-state,
@@ -444,6 +498,11 @@ body {
   text-align: center;
   color: var(--text-muted);
   font-size: 14px;
+}
+
+.footer-stats {
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 /* Responsive

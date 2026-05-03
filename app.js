@@ -28,68 +28,133 @@
   };
 
   // -------------------------------------------------------------------------
-  // Theme
+  // Theme (3 states: 'system' | 'light' | 'dark')
   // -------------------------------------------------------------------------
   var THEME_KEY = 'software-hub:theme';
+  var currentMode = 'system';
+  var systemListener = null;
 
   function getStoredTheme() {
     try {
-      return localStorage.getItem(THEME_KEY);
-    } catch (e) {
-      return null;
-    }
+      var v = localStorage.getItem(THEME_KEY);
+      if (v === 'light' || v === 'dark' || v === 'system') return v;
+    } catch (e) { /* ignore */ }
+    return null;
   }
 
-  function storeTheme(theme) {
+  function storeTheme(mode) {
     try {
-      localStorage.setItem(THEME_KEY, theme);
+      if (mode === 'system') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, mode);
+    } catch (e) { /* ignore */ }
+  }
+
+  function systemTheme() {
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     } catch (e) {
-      /* ignore */
+      return 'dark';
     }
   }
 
-  function applyTheme(theme) {
-    var root = document.documentElement;
-    if (theme === 'light') {
-      root.setAttribute('data-theme', 'light');
+  function effectiveTheme(mode) {
+    return mode === 'system' ? systemTheme() : mode;
+  }
+
+  function applyTheme(mode) {
+    var actual = effectiveTheme(mode);
+    if (actual === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
     } else {
-      root.removeAttribute('data-theme');
+      document.documentElement.removeAttribute('data-theme');
     }
     var btn = document.getElementById('theme-toggle');
-    if (btn) {
-      var icon = btn.querySelector('.theme-icon');
-      var label = btn.querySelector('.theme-label');
-      if (theme === 'light') {
-        if (icon) icon.textContent = '☀️';
-        if (label) label.textContent = 'Світла';
-        btn.setAttribute('aria-label', 'Перемкнути на темну тему');
-      } else {
-        if (icon) icon.textContent = '🌙';
-        if (label) label.textContent = 'Темна';
-        btn.setAttribute('aria-label', 'Перемкнути на світлу тему');
-      }
+    if (!btn) return;
+    var icon = btn.querySelector('.theme-icon');
+    var label = btn.querySelector('.theme-label');
+    if (mode === 'light') {
+      if (icon) icon.textContent = '☀️';
+      if (label) label.textContent = 'Світла';
+      btn.setAttribute('aria-label', 'Тема: світла. Натисни, щоб перемкнути на темну.');
+    } else if (mode === 'dark') {
+      if (icon) icon.textContent = '🌙';
+      if (label) label.textContent = 'Темна';
+      btn.setAttribute('aria-label', 'Тема: темна. Натисни, щоб перемкнути на авто (за системою).');
+    } else {
+      if (icon) icon.textContent = '🖥️';
+      if (label) label.textContent = 'Авто';
+      btn.setAttribute('aria-label', 'Тема: авто (за системою). Натисни, щоб перемкнути на світлу.');
     }
+  }
+
+  function attachSystemListener() {
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      systemListener = function () {
+        if (currentMode === 'system') applyTheme('system');
+      };
+      if (mq.addEventListener) mq.addEventListener('change', systemListener);
+      else if (mq.addListener) mq.addListener(systemListener);
+    } catch (e) { /* ignore */ }
+  }
+
+  function detachSystemListener() {
+    if (!systemListener) return;
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mq.removeEventListener) mq.removeEventListener('change', systemListener);
+      else if (mq.removeListener) mq.removeListener(systemListener);
+    } catch (e) { /* ignore */ }
+    systemListener = null;
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    storeTheme(mode);
+    applyTheme(mode);
+    detachSystemListener();
+    if (mode === 'system') attachSystemListener();
   }
 
   function initTheme() {
     var stored = getStoredTheme();
-    var theme;
-    if (stored === 'light' || stored === 'dark') {
-      theme = stored;
-    } else {
-      theme = 'dark';
-    }
-    applyTheme(theme);
+    setMode(stored || 'system');
 
     var btn = document.getElementById('theme-toggle');
     if (btn) {
       btn.addEventListener('click', function () {
-        var current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-        var next = current === 'light' ? 'dark' : 'light';
-        applyTheme(next);
-        storeTheme(next);
+        var next =
+          currentMode === 'system' ? 'light' :
+          currentMode === 'light' ? 'dark' :
+          'system';
+        setMode(next);
       });
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // URL state (?q=...&cat=...)
+  // -------------------------------------------------------------------------
+
+  function readURLState() {
+    try {
+      var p = new URLSearchParams(window.location.search);
+      var q = p.get('q');
+      var cat = p.get('cat');
+      if (q) state.query = String(q).trim();
+      if (cat) state.category = String(cat);
+    } catch (e) { /* ignore */ }
+  }
+
+  function writeURLState() {
+    try {
+      var p = new URLSearchParams();
+      if (state.query) p.set('q', state.query);
+      if (state.category && state.category !== 'Усі') p.set('cat', state.category);
+      var qs = p.toString();
+      var url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      window.history.replaceState({}, '', url);
+    } catch (e) { /* ignore */ }
   }
 
   // -------------------------------------------------------------------------
@@ -162,6 +227,39 @@
     return 'програм';
   }
 
+  /** Локативний відмінок для "категоріях" / "категорії": "у X категоріях", "у 1 категорії". */
+  function categoriesLocative(n) {
+    return n === 1 ? 'категорії' : 'категоріях';
+  }
+
+  /** Розбиває текст на текстові вузли + <mark> для підсвічування пошукового запиту. */
+  function buildHighlighted(text, query) {
+    var s = String(text == null ? '' : text);
+    if (!query || !s) return [document.createTextNode(s)];
+    var lower = s.toLowerCase();
+    var q = query.toLowerCase();
+    var nodes = [];
+    var i = 0;
+    while (i < s.length) {
+      var idx = lower.indexOf(q, i);
+      if (idx === -1) {
+        nodes.push(document.createTextNode(s.slice(i)));
+        break;
+      }
+      if (idx > i) nodes.push(document.createTextNode(s.slice(i, idx)));
+      var mark = document.createElement('mark');
+      mark.textContent = s.slice(idx, idx + q.length);
+      nodes.push(mark);
+      i = idx + q.length;
+    }
+    return nodes;
+  }
+
+  function appendHighlighted(parent, text, query) {
+    var nodes = buildHighlighted(text, query);
+    for (var i = 0; i < nodes.length; i++) parent.appendChild(nodes[i]);
+  }
+
   // -------------------------------------------------------------------------
   // Rendering
   // -------------------------------------------------------------------------
@@ -170,6 +268,14 @@
     var host = document.getElementById('categories');
     if (!host) return;
     while (host.firstChild) host.removeChild(host.firstChild);
+
+    /* Лічильники: всього + по кожній категорії (без врахування пошуку — інакше
+       лічильник у фільтрі плутав би: "Браузери (0)" коли запит звужений). */
+    var counts = Object.create(null);
+    counts['Усі'] = ALL.length;
+    ALL.forEach(function (it) {
+      if (it && it.category) counts[it.category] = (counts[it.category] || 0) + 1;
+    });
 
     var seen = Object.create(null);
     var list = [];
@@ -189,6 +295,8 @@
     }
 
     list.forEach(function (cat) {
+      var n = counts[cat] || 0;
+      var labelText = cat + ' (' + n + ')';
       var btn = el(
         'button',
         {
@@ -197,7 +305,7 @@
           role: 'tab',
           'aria-selected': cat === state.category ? 'true' : 'false',
           'data-cat': cat,
-          text: cat
+          text: labelText
         },
         null
       );
@@ -211,6 +319,7 @@
           b.setAttribute('aria-selected', isActive ? 'true' : 'false');
         }
         renderCards();
+        writeURLState();
       });
       host.appendChild(btn);
     });
@@ -220,23 +329,44 @@
     var card = el('article', { class: 'card' });
 
     var head = el('div', { class: 'card-head' });
-    head.appendChild(el('h2', { class: 'card-title', text: item.name }));
+    var title = el('h2', { class: 'card-title' });
+    appendHighlighted(title, item.name, state.query);
+    head.appendChild(title);
     if (item.category) {
       head.appendChild(el('span', { class: 'card-category', text: item.category }));
     }
     card.appendChild(head);
 
     if (item.description) {
-      card.appendChild(el('p', { class: 'card-description', text: item.description }));
+      var desc = el('p', { class: 'card-description' });
+      appendHighlighted(desc, item.description, state.query);
+      card.appendChild(desc);
     }
 
     if (Array.isArray(item.tags) && item.tags.length) {
       var tagWrap = el('div', { class: 'card-tags' });
       item.tags.forEach(function (t) {
         var kind = tagKind(t);
-        var attrs = { class: 'tag', text: t };
+        var attrs = {
+          type: 'button',
+          class: 'tag',
+          text: t,
+          'aria-label': 'Шукати за тегом: ' + t,
+          title: 'Шукати за тегом: ' + t
+        };
         if (kind) attrs['data-kind'] = kind;
-        tagWrap.appendChild(el('span', attrs));
+        var tagBtn = el('button', attrs);
+        tagBtn.addEventListener('click', function () {
+          var input = document.getElementById('search');
+          if (input) {
+            input.value = t;
+            input.focus();
+          }
+          state.query = t;
+          renderCards();
+          writeURLState();
+        });
+        tagWrap.appendChild(tagBtn);
       });
       card.appendChild(tagWrap);
     }
@@ -330,6 +460,23 @@
     }
   }
 
+  function updateFooterStats() {
+    var stats = document.getElementById('footer-stats');
+    if (!stats) return;
+    if (!ALL.length) {
+      stats.textContent = '';
+      return;
+    }
+    var cats = Object.create(null);
+    ALL.forEach(function (it) {
+      if (it && it.category) cats[it.category] = true;
+    });
+    var nCats = Object.keys(cats).length;
+    stats.textContent =
+      ' · ' + ALL.length + ' ' + declensionPrograms(ALL.length) +
+      ' у ' + nCats + ' ' + categoriesLocative(nCats);
+  }
+
   // -------------------------------------------------------------------------
   // Init
   // -------------------------------------------------------------------------
@@ -337,9 +484,44 @@
   function bindSearch() {
     var input = document.getElementById('search');
     if (!input) return;
+    if (state.query) input.value = state.query;
     input.addEventListener('input', function () {
       state.query = input.value.trim();
       renderCards();
+      writeURLState();
+    });
+  }
+
+  /** "/" або Ctrl/Cmd+K — фокус у пошук. Esc у пошуку — очистити поле. */
+  function bindHotkeys() {
+    document.addEventListener('keydown', function (e) {
+      var input = document.getElementById('search');
+      if (!input) return;
+      var target = e.target;
+      var inField =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+
+      if (!inField && (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'))) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+        return;
+      }
+
+      if (e.key === 'Escape' && document.activeElement === input) {
+        if (input.value) {
+          e.preventDefault();
+          input.value = '';
+          state.query = '';
+          renderCards();
+          writeURLState();
+        } else {
+          input.blur();
+        }
+      }
     });
   }
 
@@ -369,17 +551,19 @@
         });
         renderCategories(cats);
         renderCards();
+        updateFooterStats();
       })
       .catch(function (err) {
-        // Логуємо у консоль — для розробника. Користувач бачить дружнє повідомлення.
         if (window && window.console) console.error('[software-hub] failed to load data', err);
         showError();
       });
   }
 
   function init() {
+    readURLState();
     initTheme();
     bindSearch();
+    bindHotkeys();
     loadData();
   }
 
