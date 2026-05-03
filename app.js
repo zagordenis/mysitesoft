@@ -305,8 +305,7 @@
         {
           type: 'button',
           class: 'cat-btn' + (cat === state.category ? ' is-active' : ''),
-          role: 'tab',
-          'aria-selected': cat === state.category ? 'true' : 'false',
+          'aria-pressed': cat === state.category ? 'true' : 'false',
           'data-cat': cat,
           text: labelText
         },
@@ -319,7 +318,7 @@
           var b = btns[k];
           var isActive = b.getAttribute('data-cat') === cat;
           b.classList.toggle('is-active', isActive);
-          b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         }
         renderCards();
         writeURLState();
@@ -484,14 +483,30 @@
   // Init
   // -------------------------------------------------------------------------
 
+  function debounce(fn, wait) {
+    var t = null;
+    return function () {
+      var ctx = this;
+      var args = arguments;
+      if (t) clearTimeout(t);
+      t = setTimeout(function () {
+        t = null;
+        fn.apply(ctx, args);
+      }, wait);
+    };
+  }
+
   function bindSearch() {
     var input = document.getElementById('search');
     if (!input) return;
     if (state.query) input.value = state.query;
-    input.addEventListener('input', function () {
-      state.query = input.value.trim();
+    var apply = debounce(function () {
       renderCards();
       writeURLState();
+    }, 150);
+    input.addEventListener('input', function () {
+      state.query = input.value.trim();
+      apply();
     });
   }
 
