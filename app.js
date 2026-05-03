@@ -20,11 +20,18 @@
     'Безпека'
   ];
 
+  /** Дозволені значення для фільтрів (валідація URL + чекбоксів). */
+  var VALID_OS = ['Windows', 'Linux', 'macOS', 'Android'];
+  var VALID_SORT = ['name', 'category'];
+  var DEFAULT_SORT = 'name';
+
   /** @type {Array<Object>} */
   var ALL = [];
   var state = {
     query: '',
-    category: 'Усі'
+    category: 'Усі',
+    osFilter: [],
+    sort: DEFAULT_SORT
   };
 
   // -------------------------------------------------------------------------
@@ -148,6 +155,8 @@
       var p = new URLSearchParams(window.location.search);
       var q = p.get('q');
       var cat = p.get('cat');
+      var sort = p.get('sort');
+      var os = p.getAll('os');
       if (q) state.query = String(q).trim();
       /* Перша валідація — проти DEFAULT_CATEGORIES. Категорії з даних
          перевіряємо ще раз у renderCategories() після завантаження JSON. */
@@ -155,6 +164,16 @@
         var c = String(cat);
         if (DEFAULT_CATEGORIES.indexOf(c) !== -1) state.category = c;
         else state.pendingCategory = c;
+      }
+      if (sort && VALID_SORT.indexOf(sort) !== -1) state.sort = sort;
+      if (os && os.length) {
+        var picked = [];
+        for (var i = 0; i < os.length; i++) {
+          if (VALID_OS.indexOf(os[i]) !== -1 && picked.indexOf(os[i]) === -1) {
+            picked.push(os[i]);
+          }
+        }
+        state.osFilter = picked;
       }
     } catch (e) { /* ignore */ }
   }
@@ -164,6 +183,10 @@
       var p = new URLSearchParams();
       if (state.query) p.set('q', state.query);
       if (state.category && state.category !== 'Усі') p.set('cat', state.category);
+      if (state.sort && state.sort !== DEFAULT_SORT) p.set('sort', state.sort);
+      if (state.osFilter && state.osFilter.length) {
+        for (var i = 0; i < state.osFilter.length; i++) p.append('os', state.osFilter[i]);
+      }
       var qs = p.toString();
       var url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
       window.history.replaceState({}, '', url);
@@ -227,8 +250,20 @@
     var t = String(tagText).toLowerCase();
     if (t === 'windows') return 'os-windows';
     if (t === 'linux') return 'os-linux';
+    if (t === 'macos') return 'os-macos';
+    if (t === 'android') return 'os-android';
     if (t === 'open source') return 'open-source';
     if (t === 'free') return 'free';
+    return null;
+  }
+
+  /** Символ-іконка для OS-тегу (префікс у .tag), null якщо не OS. */
+  function tagOsIcon(tagText) {
+    var t = String(tagText).toLowerCase();
+    if (t === 'windows') return '🪟';
+    if (t === 'linux') return '🐧';
+    if (t === 'macos') return '🍎';
+    if (t === 'android') return '🤖';
     return null;
   }
 
@@ -373,15 +408,19 @@
       var tagWrap = el('div', { class: 'card-tags' });
       item.tags.forEach(function (t) {
         var kind = tagKind(t);
+        var icon = tagOsIcon(t);
         var attrs = {
           type: 'button',
           class: 'tag',
-          text: t,
           'aria-label': 'Шукати за тегом: ' + t,
           title: 'Шукати за тегом: ' + t
         };
         if (kind) attrs['data-kind'] = kind;
         var tagBtn = el('button', attrs);
+        if (icon) {
+          tagBtn.appendChild(el('span', { class: 'tag-icon', 'aria-hidden': 'true', text: icon }));
+        }
+        tagBtn.appendChild(document.createTextNode(t));
         tagBtn.addEventListener('click', function () {
           var input = document.getElementById('search');
           if (input) {
@@ -451,6 +490,30 @@
     return false;
   }
 
+  /** OR-логіка: без вибору — все проходить; інакше треба хоча один збіг. */
+  function matchesOS(item, osFilter) {
+    if (!osFilter || !osFilter.length) return true;
+    if (!Array.isArray(item.tags)) return false;
+    var tagsLower = {};
+    for (var i = 0; i < item.tags.length; i++) tagsLower[String(item.tags[i]).toLowerCase()] = true;
+    for (var j = 0; j < osFilter.length; j++) {
+      if (tagsLower[String(osFilter[j]).toLowerCase()]) return true;
+    }
+    return false;
+  }
+
+  function compareCards(a, b, sort) {
+    var nameA = String(a.name || '');
+    var nameB = String(b.name || '');
+    if (sort === 'category') {
+      var catA = String(a.category || '');
+      var catB = String(b.category || '');
+      var byCat = catA.localeCompare(catB, 'uk');
+      if (byCat !== 0) return byCat;
+    }
+    return nameA.localeCompare(nameB, 'uk');
+  }
+
   function renderCards() {
     var host = document.getElementById('cards');
     var emptyState = document.getElementById('empty-state');
@@ -459,6 +522,7 @@
 
     var filtered = ALL.filter(function (item) {
       if (state.category !== 'Усі' && item.category !== state.category) return false;
+      if (!matchesOS(item, state.osFilter)) return false;
       return matchesQuery(item, state.query);
     });
 
@@ -471,9 +535,7 @@
       var frag = document.createDocumentFragment();
       filtered
         .slice()
-        .sort(function (a, b) {
-          return String(a.name).localeCompare(String(b.name), 'uk');
-        })
+        .sort(function (a, b) { return compareCards(a, b, state.sort); })
         .forEach(function (item) {
           frag.appendChild(buildCard(item));
         });
@@ -484,6 +546,8 @@
       counter.textContent =
         'Знайдено: ' + filtered.length + ' ' + declensionPrograms(filtered.length);
     }
+
+    updateResetVisibility();
   }
 
   function updateFooterStats() {
@@ -532,6 +596,80 @@
       state.query = input.value.trim();
       apply();
     });
+  }
+
+  /** Правда, якщо хоч якийсь фільтр активний або сорт не дефолтний. */
+  function hasActiveFilters() {
+    return Boolean(
+      state.query ||
+      (state.category && state.category !== 'Усі') ||
+      (state.osFilter && state.osFilter.length) ||
+      (state.sort && state.sort !== DEFAULT_SORT)
+    );
+  }
+
+  function updateResetVisibility() {
+    var btn = document.getElementById('reset-filters');
+    if (!btn) return;
+    btn.hidden = !hasActiveFilters();
+  }
+
+  function bindFilters() {
+    var sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+      if (state.sort && VALID_SORT.indexOf(state.sort) !== -1) sortSelect.value = state.sort;
+      sortSelect.addEventListener('change', function () {
+        var v = sortSelect.value;
+        if (VALID_SORT.indexOf(v) === -1) v = DEFAULT_SORT;
+        state.sort = v;
+        renderCards();
+        writeURLState();
+      });
+    }
+
+    var osBoxes = document.querySelectorAll('.os-filter input[type="checkbox"][name="os"]');
+    for (var i = 0; i < osBoxes.length; i++) {
+      var cb = osBoxes[i];
+      if (state.osFilter.indexOf(cb.value) !== -1) cb.checked = true;
+      cb.addEventListener('change', function () {
+        var picked = [];
+        var all = document.querySelectorAll('.os-filter input[type="checkbox"][name="os"]:checked');
+        for (var k = 0; k < all.length; k++) {
+          if (VALID_OS.indexOf(all[k].value) !== -1) picked.push(all[k].value);
+        }
+        state.osFilter = picked;
+        renderCards();
+        writeURLState();
+      });
+    }
+
+    var resetBtn = document.getElementById('reset-filters');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.query = '';
+        state.category = 'Усі';
+        state.osFilter = [];
+        state.sort = DEFAULT_SORT;
+
+        var input = document.getElementById('search');
+        if (input) input.value = '';
+        if (sortSelect) sortSelect.value = DEFAULT_SORT;
+        var allOs = document.querySelectorAll('.os-filter input[type="checkbox"][name="os"]');
+        for (var m = 0; m < allOs.length; m++) allOs[m].checked = false;
+
+        var catBtns = document.querySelectorAll('#categories .cat-btn');
+        for (var n = 0; n < catBtns.length; n++) {
+          var b = catBtns[n];
+          var isAll = b.getAttribute('data-cat') === 'Усі';
+          b.classList.toggle('is-active', isAll);
+          b.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+        }
+
+        renderCards();
+        writeURLState();
+        if (input) input.focus();
+      });
+    }
   }
 
   /** "/" або Ctrl/Cmd+K — фокус у пошук. Esc у пошуку — очистити поле. */
@@ -610,6 +748,7 @@
     readURLState();
     initTheme();
     bindSearch();
+    bindFilters();
     bindHotkeys();
     loadData();
   }
