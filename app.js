@@ -33,6 +33,9 @@
   var THEME_KEY = 'software-hub:theme';
   var currentMode = 'system';
   var systemListener = null;
+  /* matchMedia() returns a fresh MediaQueryList object on each call,
+     so the same instance must be used to add and remove the listener. */
+  var systemMQ = null;
 
   function getStoredTheme() {
     try {
@@ -89,23 +92,23 @@
 
   function attachSystemListener() {
     try {
-      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      systemMQ = window.matchMedia('(prefers-color-scheme: dark)');
       systemListener = function () {
         if (currentMode === 'system') applyTheme('system');
       };
-      if (mq.addEventListener) mq.addEventListener('change', systemListener);
-      else if (mq.addListener) mq.addListener(systemListener);
+      if (systemMQ.addEventListener) systemMQ.addEventListener('change', systemListener);
+      else if (systemMQ.addListener) systemMQ.addListener(systemListener);
     } catch (e) { /* ignore */ }
   }
 
   function detachSystemListener() {
-    if (!systemListener) return;
+    if (!systemListener || !systemMQ) return;
     try {
-      var mq = window.matchMedia('(prefers-color-scheme: dark)');
-      if (mq.removeEventListener) mq.removeEventListener('change', systemListener);
-      else if (mq.removeListener) mq.removeListener(systemListener);
+      if (systemMQ.removeEventListener) systemMQ.removeEventListener('change', systemListener);
+      else if (systemMQ.removeListener) systemMQ.removeListener(systemListener);
     } catch (e) { /* ignore */ }
     systemListener = null;
+    systemMQ = null;
   }
 
   function setMode(mode) {
