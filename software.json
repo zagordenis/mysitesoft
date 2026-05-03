@@ -49,7 +49,7 @@
     "category": "Браузери",
     "description": "Швидкий браузер від Google з підтримкою синхронізації, розширень та сучасних веб-стандартів.",
     "download": "https://www.google.com/chrome/",
-    "website": "https://www.google.com/chrome/",
+    "website": "",
     "guide": "",
     "tags": ["Windows", "Linux", "Free", "Browser"]
   },
