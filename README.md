@@ -19,6 +19,9 @@ software-hub/
 ├── app.js
 ├── software.json
 ├── README.md
+├── .nojekyll               # GitHub Pages: вимикає Jekyll
+├── .github/workflows/
+│   └── pages.yml           # авто-деплой на GitHub Pages
 └── assets/
     └── icons/
 ```
@@ -88,6 +91,27 @@ npx --yes serve -l 8080 .
 # PHP (вбудований сервер)
 php -S localhost:8080
 ```
+
+## Розгортання через GitHub Pages
+
+У репо вже налаштовано workflow `.github/workflows/pages.yml`, який автоматично публікує сайт після кожного push у `main`.
+
+**Перше підключення:**
+
+1. У GitHub перейди в **Settings → Pages**.
+2. У розділі **Build and deployment → Source** обери **GitHub Actions**.
+3. Закомить будь-яку зміну в `main` (або запусти workflow вручну: **Actions → Deploy to GitHub Pages → Run workflow**). Після успіху сайт буде доступний за адресою `https://<user>.github.io/<repo>/` — точний URL покаже сам workflow в логу кроку *Deploy to GitHub Pages*.
+
+**Як це працює:**
+
+- Workflow тригериться на `push` у `main` і вручну (`workflow_dispatch`).
+- Артефакт — увесь корінь репо як статичний сайт (нема build-кроку).
+- `.nojekyll` забороняє GitHub'у запускати Jekyll, який міг би сховати файли, що починаються з `_`, або зламати кеш.
+- Усі шляхи в `index.html` та `app.js` (`style.css`, `app.js`, `software.json`, `assets/icons/favicon.svg`) — відносні, тож сайт коректно працює і на user/organization page (`https://<user>.github.io/`), і на project page (`https://<user>.github.io/<repo>/`).
+
+**Кастомний домен:**
+
+Якщо хочеш свій домен, додай файл `CNAME` у корінь репо з єдиним рядком — твоїм доменом (наприклад `software.example.com`) — і налаштуй відповідний DNS-запис (CNAME → `<user>.github.io`).
 
 ## Розгортання через Nginx
 
