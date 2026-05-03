@@ -45,10 +45,11 @@
     return null;
   }
 
+  /* Завжди записуємо явне значення, щоб getStoredTheme() міг розрізнити
+     "користувач сам обрав 'system'" і "ніколи не відкривав сайт". */
   function storeTheme(mode) {
     try {
-      if (mode === 'system') localStorage.removeItem(THEME_KEY);
-      else localStorage.setItem(THEME_KEY, mode);
+      localStorage.setItem(THEME_KEY, mode);
     } catch (e) { /* ignore */ }
   }
 
@@ -120,6 +121,9 @@
   }
 
   function initTheme() {
+    /* Дефолт — 'system': перший візит підхоплює системну тему через
+       prefers-color-scheme. Користувач може перемкнути в light / dark і
+       назад у system через 3-stateний тогл (див. кнопку нижче). */
     var stored = getStoredTheme();
     setMode(stored || 'system');
 
@@ -145,7 +149,13 @@
       var q = p.get('q');
       var cat = p.get('cat');
       if (q) state.query = String(q).trim();
-      if (cat) state.category = String(cat);
+      /* Перша валідація — проти DEFAULT_CATEGORIES. Категорії з даних
+         перевіряємо ще раз у renderCategories() після завантаження JSON. */
+      if (cat) {
+        var c = String(cat);
+        if (DEFAULT_CATEGORIES.indexOf(c) !== -1) state.category = c;
+        else state.pendingCategory = c;
+      }
     } catch (e) { /* ignore */ }
   }
 
@@ -230,9 +240,14 @@
     return 'програм';
   }
 
-  /** Локативний відмінок для "категоріях" / "категорії": "у X категоріях", "у 1 категорії". */
+  /** Локативний відмінок для "категоріях" / "категорії": "у X категоріях", "у 1 категорії".
+   *  Та сама логіка mod10/mod100, що й у declensionPrograms — щоб 21, 31, 101 теж
+   *  давали "категорії", а 11 — "категоріях". */
   function categoriesLocative(n) {
-    return n === 1 ? 'категорії' : 'категоріях';
+    var mod10 = n % 10;
+    var mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return 'категорії';
+    return 'категоріях';
   }
 
   /** Розбиває текст на текстові вузли + <mark> для підсвічування пошукового запиту. */
@@ -295,6 +310,15 @@
         seen[d] = true;
         list.push(d);
       }
+    }
+
+    /* Друга валідація URL ?cat=…: якщо у readURLState() значення не співпало з
+       DEFAULT_CATEGORIES, тут перевіряємо ще раз — раптом це категорія з даних
+       (нова, не в дефолтному списку). Якщо не співпало — лишаємо 'Усі'. */
+    if (state.pendingCategory) {
+      if (seen[state.pendingCategory]) state.category = state.pendingCategory;
+      delete state.pendingCategory;
+      writeURLState();
     }
 
     list.forEach(function (cat) {
@@ -522,7 +546,12 @@
           target.tagName === 'TEXTAREA' ||
           target.isContentEditable);
 
-      if (!inField && (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'))) {
+      /* Ctrl/Cmd+K — глобальний хоткей: працює навіть у полях вводу,
+         бо це стандартна звичка "шукати" (як у Slack/Discord/GitHub).
+         "/" — лише поза полями, інакше неможливо буде ввести слеш. */
+      var isCtrlK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k';
+      var isSlash = e.key === '/' && !inField;
+      if (isCtrlK || isSlash) {
         e.preventDefault();
         input.focus();
         input.select();
