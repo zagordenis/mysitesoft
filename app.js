@@ -36,12 +36,54 @@
 
   var BASE_TITLE = 'Software Hub';
 
-  /** Стійка ASCII-форма назви для id картки і hash-permalink. */
+  /* Транслітерація укр. кирилиці → латиниця за чинним стандартом КМУ 55-2010
+   * (для slug-ів, не для документів). Решта символів далі ремапиться через
+   * `[^a-z0-9]+ → '-'`, тож тут потрібні лише відповідники для літер. */
+  var UA_TRANSLIT = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e',
+    'є': 'ie', 'ж': 'zh', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'i', 'й': 'i',
+    'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+    'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch',
+    'ш': 'sh', 'щ': 'shch', 'ь': '', 'ю': 'iu', 'я': 'ia', '\'': '',
+    'ё': 'e', 'ы': 'y', 'э': 'e', 'ъ': ''
+  };
+
+  /** Стійка ASCII-форма назви для id картки і hash-permalink.
+   * Транслітерує кирилицю, зберігає знакові символи на кшталт `++`,
+   * гарантує непорожній результат. Унікальність дублікатів — у renderCards. */
   function slugify(s) {
-    return String(s)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    var lower = String(s).toLowerCase();
+    var out = '';
+    for (var i = 0; i < lower.length; i++) {
+      var ch = lower.charAt(i);
+      if (UA_TRANSLIT.hasOwnProperty(ch)) {
+        out += UA_TRANSLIT[ch];
+      } else if (ch === '+') {
+        out += '-plus';
+      } else if (ch === '#') {
+        out += '-sharp';
+      } else {
+        out += ch;
+      }
+    }
+    out = out.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return out || 'item';
+  }
+
+  /** Повертає функцію, що видає унікальний slug у межах одного рендеру. */
+  function makeSlugAllocator() {
+    var seen = {};
+    return function (name) {
+      var base = slugify(name);
+      var slug = base;
+      var n = 2;
+      while (seen[slug]) {
+        slug = base + '-' + n;
+        n++;
+      }
+      seen[slug] = true;
+      return slug;
+    };
   }
 
   // -------------------------------------------------------------------------
@@ -396,8 +438,7 @@
     });
   }
 
-  function buildCard(item) {
-    var slug = slugify(item.name);
+  function buildCard(item, slug) {
     var card = el('article', { class: 'card', id: 'card-' + slug });
 
     var head = el('div', { class: 'card-head' });
@@ -553,11 +594,12 @@
     } else {
       if (emptyState) emptyState.hidden = true;
       var frag = document.createDocumentFragment();
+      var allocSlug = makeSlugAllocator();
       filtered
         .slice()
         .sort(function (a, b) { return compareCards(a, b, state.sort); })
         .forEach(function (item) {
-          frag.appendChild(buildCard(item));
+          frag.appendChild(buildCard(item, allocSlug(item.name)));
         });
       host.appendChild(frag);
     }

@@ -46,7 +46,9 @@ self.addEventListener('fetch', function (event) {
   try { url = new URL(req.url); } catch (e) { return; }
   if (url.origin !== self.location.origin) return;
 
-  // software.json: stale-while-revalidate
+  // software.json: stale-while-revalidate.
+  // event.waitUntil(network) тримає SW живим, поки фонове оновлення кешу не завершиться —
+  // інакше браузер може вбити worker зразу після респонсу і cache.put() ніколи не відпрацює.
   if (url.pathname.indexOf('/software.json') !== -1) {
     event.respondWith(
       caches.open(CACHE_VERSION).then(function (cache) {
@@ -57,6 +59,7 @@ self.addEventListener('fetch', function (event) {
             }
             return resp;
           }).catch(function () { return cached || Response.error(); });
+          event.waitUntil(network);
           return cached || network;
         });
       })
