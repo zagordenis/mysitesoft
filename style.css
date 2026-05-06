@@ -503,6 +503,51 @@ body {
   flex: 0 0 auto;
 }
 
+.card-permalink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.card:hover .card-permalink,
+.card-permalink:hover,
+.card-permalink:focus-visible {
+  opacity: 1;
+}
+
+.card-permalink:hover,
+.card-permalink:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+@media (hover: none) {
+  .card-permalink {
+    opacity: 0.6;
+  }
+}
+
+.card.is-highlighted {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  animation: card-highlight-pulse 2s ease-out;
+}
+
+@keyframes card-highlight-pulse {
+  0% { outline-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  100% { outline-color: var(--accent); box-shadow: 0 0 0 0 transparent; }
+}
+
 .card-description {
   margin: 0;
   color: var(--text-muted);

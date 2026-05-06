@@ -18,13 +18,39 @@ software-hub/
 ├── style.css
 ├── app.js
 ├── software.json
+├── manifest.webmanifest    # PWA: метадані для install-banner
+├── sw.js                   # PWA: service worker (offline cache)
 ├── README.md
+├── CONTRIBUTING.md
 ├── .nojekyll               # GitHub Pages: вимикає Jekyll
-├── .github/workflows/
-│   └── pages.yml           # авто-деплой на GitHub Pages
+├── .schema/
+│   └── software.schema.json # JSON Schema для валідації
+├── .github/
+│   ├── workflows/
+│   │   ├── pages.yml             # авто-деплой на GitHub Pages
+│   │   └── validate-schema.yml   # CI-валідація software.json
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/
 └── assets/
     └── icons/
+        ├── favicon.svg
+        ├── icon-192.png    # PWA
+        ├── icon-512.png    # PWA
+        ├── apple-touch-icon.png
+        └── og-image.png    # Open Graph / Twitter card
 ```
+
+## PWA (Progressive Web App)
+
+Сайт встановлюється як застосунок на десктопі та мобільних:
+
+- **Chrome / Edge** (десктоп): кнопка "Install" праворуч в адресному рядку
+- **Safari** (iOS): "Поділитися → На головний екран"
+- **Firefox Android**: меню → "Додати на головний екран"
+
+Service worker кешує `index.html`, `style.css`, `app.js`, `software.json` та іконки на першому візиті — після цього сайт працює офлайн. `software.json` оновлюється у фоні (stale-while-revalidate), коли інтернет повертається.
+
+Щоб скинути кеш у DevTools: Application → Storage → "Clear site data".
 
 ## Як додати нову програму
 

@@ -34,6 +34,58 @@
     sort: DEFAULT_SORT
   };
 
+  var BASE_TITLE = 'Software Hub';
+
+  /* Транслітерація укр. кирилиці → латиниця за чинним стандартом КМУ 55-2010
+   * (для slug-ів, не для документів). Решта символів далі ремапиться через
+   * `[^a-z0-9]+ → '-'`, тож тут потрібні лише відповідники для літер. */
+  var UA_TRANSLIT = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e',
+    'є': 'ie', 'ж': 'zh', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'i', 'й': 'i',
+    'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+    'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch',
+    'ш': 'sh', 'щ': 'shch', 'ь': '', 'ю': 'iu', 'я': 'ia', '\'': '',
+    'ё': 'e', 'ы': 'y', 'э': 'e', 'ъ': ''
+  };
+
+  /** Стійка ASCII-форма назви для id картки і hash-permalink.
+   * Транслітерує кирилицю, зберігає знакові символи на кшталт `++`,
+   * гарантує непорожній результат. Унікальність дублікатів — у renderCards. */
+  function slugify(s) {
+    var lower = String(s).toLowerCase();
+    var out = '';
+    for (var i = 0; i < lower.length; i++) {
+      var ch = lower.charAt(i);
+      if (UA_TRANSLIT.hasOwnProperty(ch)) {
+        out += UA_TRANSLIT[ch];
+      } else if (ch === '+') {
+        out += '-plus';
+      } else if (ch === '#') {
+        out += '-sharp';
+      } else {
+        out += ch;
+      }
+    }
+    out = out.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return out || 'item';
+  }
+
+  /** Повертає функцію, що видає унікальний slug у межах одного рендеру. */
+  function makeSlugAllocator() {
+    var seen = {};
+    return function (name) {
+      var base = slugify(name);
+      var slug = base;
+      var n = 2;
+      while (seen[slug]) {
+        slug = base + '-' + n;
+        n++;
+      }
+      seen[slug] = true;
+      return slug;
+    };
+  }
+
   // -------------------------------------------------------------------------
   // Theme (3 states: 'system' | 'light' | 'dark')
   // -------------------------------------------------------------------------
@@ -386,8 +438,8 @@
     });
   }
 
-  function buildCard(item) {
-    var card = el('article', { class: 'card' });
+  function buildCard(item, slug) {
+    var card = el('article', { class: 'card', id: 'card-' + slug });
 
     var head = el('div', { class: 'card-head' });
     var title = el('h2', { class: 'card-title' });
@@ -396,6 +448,15 @@
     if (item.category) {
       head.appendChild(el('span', { class: 'card-category', text: item.category }));
     }
+    /* Прямий лінк на картку: натискання змінює hash, правий клік → копіювати лінк. */
+    var permalink = el('a', {
+      class: 'card-permalink',
+      href: '#card-' + slug,
+      title: 'Прямий лінк',
+      'aria-label': 'Прямий лінк на ' + item.name
+    });
+    permalink.appendChild(el('span', { 'aria-hidden': 'true', text: '#' }));
+    head.appendChild(permalink);
     card.appendChild(head);
 
     if (item.description) {
@@ -533,11 +594,12 @@
     } else {
       if (emptyState) emptyState.hidden = true;
       var frag = document.createDocumentFragment();
+      var allocSlug = makeSlugAllocator();
       filtered
         .slice()
         .sort(function (a, b) { return compareCards(a, b, state.sort); })
         .forEach(function (item) {
-          frag.appendChild(buildCard(item));
+          frag.appendChild(buildCard(item, allocSlug(item.name)));
         });
       host.appendChild(frag);
     }
@@ -548,6 +610,40 @@
     }
 
     updateResetVisibility();
+    updateDocumentTitle(filtered.length);
+  }
+
+  /** Динамічний <title> з активних фільтрів — для шарингу/закладок. */
+  function updateDocumentTitle(count) {
+    var parts = [];
+    if (state.category && state.category !== 'Усі') parts.push(state.category);
+    if (state.query) parts.push('пошук: «' + state.query + '»');
+    if (state.osFilter && state.osFilter.length) parts.push('ОС: ' + state.osFilter.join('+'));
+    var title = BASE_TITLE;
+    if (parts.length) {
+      title = BASE_TITLE + ' — ' + parts.join(' · ');
+      if (typeof count === 'number') title += ' (' + count + ')';
+    }
+    if (document.title !== title) document.title = title;
+  }
+
+  /** Скрол + підсвітка на 2с, якщо в URL є #card-<slug>. Поважає reduced-motion. */
+  function focusHashTarget() {
+    var hash = window.location.hash || '';
+    if (hash.length < 2) return;
+    var id = hash.slice(1);
+    if (id.indexOf('card-') !== 0) return;
+    var target = document.getElementById(id);
+    if (!target || !target.classList.contains('card')) return;
+    var reduced = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      target.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+    } catch (e) {
+      target.scrollIntoView();
+    }
+    target.classList.add('is-highlighted');
+    setTimeout(function () { target.classList.remove('is-highlighted'); }, 2000);
   }
 
   function updateFooterStats() {
@@ -737,11 +833,28 @@
         renderCategories(cats);
         renderCards();
         updateFooterStats();
+        /* Картки існують — тепер можна скролити до hash-цілі. */
+        focusHashTarget();
       })
       .catch(function (err) {
         if (window && window.console) console.error('[software-hub] failed to load data', err);
         showError();
       });
+  }
+
+  function bindHashChange() {
+    window.addEventListener('hashchange', focusHashTarget);
+  }
+
+  /* PWA: реєструємо service worker. Сам файл sw.js на тому ж origin, scope './'. */
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (window.location.protocol === 'file:') return;
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function (err) {
+        if (window && window.console) console.warn('[software-hub] SW registration failed', err);
+      });
+    });
   }
 
   function init() {
@@ -750,7 +863,9 @@
     bindSearch();
     bindFilters();
     bindHotkeys();
+    bindHashChange();
     loadData();
+    registerServiceWorker();
   }
 
   if (document.readyState === 'loading') {

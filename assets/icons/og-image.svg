@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1115"/>
+      <stop offset="100%" stop-color="#1a1f2b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80, 215)">
+    <rect width="200" height="200" rx="44" fill="#11151c" stroke="#2a3242" stroke-width="2"/>
+    <path d="M50 70h100M50 102h100M50 134h66" stroke="#6aa6ff" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="170" cy="134" r="11" fill="#6aa6ff"/>
+  </g>
+  <g transform="translate(340, 250)">
+    <text font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="84" fill="#e8eaed">Software Hub</text>
+    <text y="68" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="28" fill="#a0a6b1">Каталог корисного софту, утиліт</text>
+    <text y="108" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="28" fill="#a0a6b1">і посилань для швидкого встановлення</text>
+  </g>
+  <g transform="translate(340, 470)">
+    <rect width="120" height="36" rx="18" fill="#1a2436" stroke="#2a3242"/>
+    <text x="60" y="24" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="16" fill="#6aa6ff">Free</text>
+    <rect x="136" width="170" height="36" rx="18" fill="#1a2436" stroke="#2a3242"/>
+    <text x="221" y="24" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="16" fill="#6aa6ff">Open Source</text>
+    <rect x="322" width="140" height="36" rx="18" fill="#1a2436" stroke="#2a3242"/>
+    <text x="392" y="24" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="16" fill="#6aa6ff">Static site</text>
+  </g>
+</svg>
