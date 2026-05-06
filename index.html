@@ -92,6 +92,18 @@
           <label class="os-check"><input type="checkbox" name="os" value="Android" /><span>Android</span></label>
         </fieldset>
 
+        <button
+          id="fav-toggle"
+          class="btn btn--ghost"
+          type="button"
+          aria-pressed="false"
+          title="Показати лише обрані програми"
+        >
+          <span class="fav-toggle-icon" aria-hidden="true">☆</span>
+          <span class="fav-toggle-label">Тільки обране</span>
+          <span id="fav-count" class="fav-toggle-count" aria-hidden="true"></span>
+        </button>
+
         <button id="reset-filters" class="btn btn--ghost" type="button" hidden>Скинути фільтри</button>
       </div>
 
@@ -112,6 +124,19 @@
       </div>
     </noscript>
   </main>
+
+  <dialog id="card-modal" class="modal" aria-labelledby="modal-title" aria-describedby="modal-description">
+    <article class="modal-card">
+      <header class="modal-head">
+        <h2 id="modal-title" class="modal-title"></h2>
+        <button id="modal-close" class="modal-close" type="button" aria-label="Закрити">×</button>
+      </header>
+      <div id="modal-meta" class="modal-meta"></div>
+      <p id="modal-description" class="modal-description"></p>
+      <div id="modal-tags" class="modal-tags"></div>
+      <div id="modal-actions" class="modal-actions"></div>
+    </article>
+  </dialog>
 
   <footer class="site-footer">
     <div class="container">
