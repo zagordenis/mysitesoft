@@ -1,0 +1,92 @@
+name: Link checker
+
+# Cron-перевірка усіх зовнішніх посилань з software.json (download/website/guide).
+# Запускається:
+#   - щотижня в понеділок о 09:00 UTC (12:00 Київ),
+#   - при пуші в main, що зачіпає software.json,
+#   - вручну з вкладки Actions.
+# При знайдених битих лінках автоматично створює issue з повним звітом.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - software.json
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: link-check
+  cancel-in-progress: false
+
+jobs:
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract URLs from software.json
+        run: |
+          python3 - <<'PY'
+          import json, sys
+
+          with open('software.json', encoding='utf-8') as f:
+              data = json.load(f)
+
+          urls = set()
+          for item in data:
+              if not isinstance(item, dict):
+                  continue
+              for key in ('download', 'website', 'guide'):
+                  value = item.get(key)
+                  if isinstance(value, str):
+                      v = value.strip()
+                      if v.startswith(('http://', 'https://')):
+                          urls.add(v)
+
+          with open('urls.txt', 'w', encoding='utf-8') as out:
+              for u in sorted(urls):
+                  out.write(u + '\n')
+
+          print(f'Extracted {len(urls)} unique URLs from software.json')
+          PY
+
+      - name: Run lychee link checker
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --max-concurrency 4
+            --max-retries 2
+            --retry-wait-time 30
+            --timeout 30
+            --accept 200..=299,403,429
+            --user-agent "Mozilla/5.0 (compatible; SoftwareHubLinkChecker/1.0; +https://github.com/zagordenis/mysitesoft)"
+            urls.txt
+          fail: false
+          output: ./lychee-report.md
+
+      - name: Upload report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lychee-report
+          path: lychee-report.md
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Create / update issue on failure
+        if: steps.lychee.outputs.exit_code != '0'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: 'Link checker: знайдено биті посилання'
+          content-filepath: ./lychee-report.md
+          labels: |
+            broken-link
+            automated
