@@ -56,7 +56,7 @@ self.addEventListener('fetch', function (event) {
               cache.put(req, resp.clone());
             }
             return resp;
-          }).catch(function () { return cached; });
+          }).catch(function () { return cached || Response.error(); });
           return cached || network;
         });
       })
