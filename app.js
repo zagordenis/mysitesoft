@@ -34,6 +34,16 @@
     sort: DEFAULT_SORT
   };
 
+  var BASE_TITLE = 'Software Hub';
+
+  /** Стійка ASCII-форма назви для id картки і hash-permalink. */
+  function slugify(s) {
+    return String(s)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   // -------------------------------------------------------------------------
   // Theme (3 states: 'system' | 'light' | 'dark')
   // -------------------------------------------------------------------------
@@ -387,7 +397,8 @@
   }
 
   function buildCard(item) {
-    var card = el('article', { class: 'card' });
+    var slug = slugify(item.name);
+    var card = el('article', { class: 'card', id: 'card-' + slug });
 
     var head = el('div', { class: 'card-head' });
     var title = el('h2', { class: 'card-title' });
@@ -396,6 +407,15 @@
     if (item.category) {
       head.appendChild(el('span', { class: 'card-category', text: item.category }));
     }
+    /* Прямий лінк на картку: натискання змінює hash, правий клік → копіювати лінк. */
+    var permalink = el('a', {
+      class: 'card-permalink',
+      href: '#card-' + slug,
+      title: 'Прямий лінк',
+      'aria-label': 'Прямий лінк на ' + item.name
+    });
+    permalink.appendChild(el('span', { 'aria-hidden': 'true', text: '#' }));
+    head.appendChild(permalink);
     card.appendChild(head);
 
     if (item.description) {
@@ -548,6 +568,40 @@
     }
 
     updateResetVisibility();
+    updateDocumentTitle(filtered.length);
+  }
+
+  /** Динамічний <title> з активних фільтрів — для шарингу/закладок. */
+  function updateDocumentTitle(count) {
+    var parts = [];
+    if (state.category && state.category !== 'Усі') parts.push(state.category);
+    if (state.query) parts.push('пошук: «' + state.query + '»');
+    if (state.osFilter && state.osFilter.length) parts.push('ОС: ' + state.osFilter.join('+'));
+    var title = BASE_TITLE;
+    if (parts.length) {
+      title = BASE_TITLE + ' — ' + parts.join(' · ');
+      if (typeof count === 'number') title += ' (' + count + ')';
+    }
+    if (document.title !== title) document.title = title;
+  }
+
+  /** Скрол + підсвітка на 2с, якщо в URL є #card-<slug>. Поважає reduced-motion. */
+  function focusHashTarget() {
+    var hash = window.location.hash || '';
+    if (hash.length < 2) return;
+    var id = hash.slice(1);
+    if (id.indexOf('card-') !== 0) return;
+    var target = document.getElementById(id);
+    if (!target || !target.classList.contains('card')) return;
+    var reduced = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      target.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+    } catch (e) {
+      target.scrollIntoView();
+    }
+    target.classList.add('is-highlighted');
+    setTimeout(function () { target.classList.remove('is-highlighted'); }, 2000);
   }
 
   function updateFooterStats() {
@@ -737,11 +791,28 @@
         renderCategories(cats);
         renderCards();
         updateFooterStats();
+        /* Картки існують — тепер можна скролити до hash-цілі. */
+        focusHashTarget();
       })
       .catch(function (err) {
         if (window && window.console) console.error('[software-hub] failed to load data', err);
         showError();
       });
+  }
+
+  function bindHashChange() {
+    window.addEventListener('hashchange', focusHashTarget);
+  }
+
+  /* PWA: реєструємо service worker. Сам файл sw.js на тому ж origin, scope './'. */
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (window.location.protocol === 'file:') return;
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function (err) {
+        if (window && window.console) console.warn('[software-hub] SW registration failed', err);
+      });
+    });
   }
 
   function init() {
@@ -750,7 +821,9 @@
     bindSearch();
     bindFilters();
     bindHotkeys();
+    bindHashChange();
     loadData();
+    registerServiceWorker();
   }
 
   if (document.readyState === 'loading') {
