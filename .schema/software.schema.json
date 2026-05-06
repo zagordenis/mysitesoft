@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zagordenis/mysitesoft/blob/main/.schema/software.schema.json",
+  "title": "Software Hub catalog",
+  "description": "Schema for software.json — flat-file catalog of software entries.",
+  "type": "array",
+  "minItems": 1,
+  "items": { "$ref": "#/$defs/program" },
+  "$defs": {
+    "program": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "category", "description", "download", "tags"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Display name of the program."
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Single category. New categories appear as filters automatically when used."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Short Ukrainian description, 1–2 sentences."
+        },
+        "download": {
+          "$ref": "#/$defs/httpUrl",
+          "description": "Direct link to the official download page. Required."
+        },
+        "website": {
+          "$ref": "#/$defs/httpUrlOrEmpty",
+          "description": "Official site. May be an empty string."
+        },
+        "guide": {
+          "$ref": "#/$defs/httpUrlOrEmpty",
+          "description": "Documentation / guide URL. May be an empty string."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 12,
+          "description": "Free-form tags. OS tags (Windows/Linux/macOS/Android) drive the OS filter."
+        },
+        "license": {
+          "type": "string",
+          "enum": ["free", "open-source", "proprietary", "trial", "freemium"],
+          "description": "Optional. Normalized license category."
+        },
+        "lastChecked": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Optional. ISO 8601 date (YYYY-MM-DD) when the download URL was last verified."
+        }
+      }
+    },
+    "httpUrl": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 500,
+      "pattern": "^https?://[^\\s]+$"
+    },
+    "httpUrlOrEmpty": {
+      "type": "string",
+      "maxLength": 500,
+      "anyOf": [
+        { "maxLength": 0 },
+        { "pattern": "^https?://[^\\s]+$" }
+      ]
+    }
+  }
+}
