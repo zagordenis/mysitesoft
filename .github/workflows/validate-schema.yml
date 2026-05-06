@@ -1,0 +1,56 @@
+name: Validate software.json
+
+on:
+  pull_request:
+    paths:
+      - 'software.json'
+      - '.schema/software.schema.json'
+      - '.github/workflows/validate-schema.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'software.json'
+      - '.schema/software.schema.json'
+      - '.github/workflows/validate-schema.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install jsonschema
+        run: pip install --no-cache-dir 'jsonschema[format]==4.23.0'
+
+      - name: Validate software.json against schema
+        run: |
+          python - <<'PY'
+          import json, sys
+          from jsonschema import Draft202012Validator, FormatChecker
+
+          with open('.schema/software.schema.json', encoding='utf-8') as f:
+              schema = json.load(f)
+          with open('software.json', encoding='utf-8') as f:
+              data = json.load(f)
+
+          validator = Draft202012Validator(schema, format_checker=FormatChecker())
+          errors = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))
+          if errors:
+              for err in errors:
+                  path = '/'.join(str(p) for p in err.absolute_path) or '<root>'
+                  print(f"FAIL  {path}: {err.message}")
+              sys.exit(1)
+
+          print(f"OK    software.json is valid ({len(data)} entries)")
+
+          names = [item.get('name', '<no name>') for item in data]
+          duplicates = sorted({n for n in names if names.count(n) > 1})
+          if duplicates:
+              print(f"FAIL  duplicate name(s) in software.json: {', '.join(duplicates)}")
+              sys.exit(1)
+          print(f"OK    no duplicate names")
+          PY
