@@ -31,7 +31,8 @@
     query: '',
     category: 'Усі',
     osFilter: [],
-    sort: DEFAULT_SORT
+    sort: DEFAULT_SORT,
+    favOnly: false
   };
 
   var BASE_TITLE = 'Software Hub';
@@ -70,9 +71,11 @@
     return out || 'item';
   }
 
-  /** Повертає функцію, що видає унікальний slug у межах одного рендеру. */
+  /** Повертає функцію, що видає унікальний slug у межах одного рендеру.
+   * Object.create(null) — щоб назва на кшталт "Constructor" не колізіонувала
+   * з Object.prototype.constructor через прототипну спадковість. */
   function makeSlugAllocator() {
-    var seen = {};
+    var seen = Object.create(null);
     return function (name) {
       var base = slugify(name);
       var slug = base;
@@ -84,6 +87,62 @@
       seen[slug] = true;
       return slug;
     };
+  }
+
+  // -------------------------------------------------------------------------
+  // Favorites — persisted as lowercased item.name in localStorage
+  // -------------------------------------------------------------------------
+  var FAV_KEY = 'software-hub:favorites';
+  /* Object.create(null) — щоб ключі типу "constructor" / "toString" не
+     колізіонували з властивостями Object.prototype при is-fav перевірці. */
+  var favorites = Object.create(null);
+
+  function favKey(name) {
+    return String(name == null ? '' : name).toLowerCase().trim();
+  }
+
+  function loadFavorites() {
+    try {
+      var raw = localStorage.getItem(FAV_KEY);
+      if (!raw) return;
+      var list = JSON.parse(raw);
+      if (!Array.isArray(list)) return;
+      favorites = Object.create(null);
+      for (var i = 0; i < list.length; i++) {
+        var k = list[i];
+        if (typeof k === 'string' && k) favorites[k.toLowerCase().trim()] = true;
+      }
+    } catch (e) { /* ignore — невалідне сховище = пустий стан */ }
+  }
+
+  function saveFavorites() {
+    try {
+      var keys = [];
+      for (var k in favorites) {
+        if (Object.prototype.hasOwnProperty.call(favorites, k)) keys.push(k);
+      }
+      localStorage.setItem(FAV_KEY, JSON.stringify(keys));
+    } catch (e) { /* ignore — privacy mode / quota */ }
+  }
+
+  function isFav(name) { return Boolean(favorites[favKey(name)]); }
+
+  function toggleFav(name) {
+    var k = favKey(name);
+    if (!k) return false;
+    if (favorites[k]) delete favorites[k];
+    else favorites[k] = true;
+    saveFavorites();
+    return Boolean(favorites[k]);
+  }
+
+  /** Кількість збережених обраних, які реально присутні в каталозі. */
+  function favCountInCatalog() {
+    var n = 0;
+    for (var i = 0; i < ALL.length; i++) {
+      if (ALL[i] && ALL[i].name && isFav(ALL[i].name)) n++;
+    }
+    return n;
   }
 
   // -------------------------------------------------------------------------
@@ -209,7 +268,9 @@
       var cat = p.get('cat');
       var sort = p.get('sort');
       var os = p.getAll('os');
+      var fav = p.get('fav');
       if (q) state.query = String(q).trim();
+      if (fav === '1') state.favOnly = true;
       /* Перша валідація — проти DEFAULT_CATEGORIES. Категорії з даних
          перевіряємо ще раз у renderCategories() після завантаження JSON. */
       if (cat) {
@@ -239,6 +300,7 @@
       if (state.osFilter && state.osFilter.length) {
         for (var i = 0; i < state.osFilter.length; i++) p.append('os', state.osFilter[i]);
       }
+      if (state.favOnly) p.set('fav', '1');
       var qs = p.toString();
       var url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
       window.history.replaceState({}, '', url);
@@ -438,16 +500,250 @@
     });
   }
 
+  /** Кнопка-зірка, яку можна вставити в head картки (compact) або модалку.
+   *  Перемальовує картки, якщо активний favOnly-фільтр (інакше прибрана з обраних
+   *  картка не зникає миттєво з відфільтрованої вибірки). */
+  function buildFavButton(item, opts) {
+    var compact = !!(opts && opts.compact);
+    var on = isFav(item.name);
+    var btn = el('button', {
+      type: 'button',
+      class: 'fav-btn' + (compact ? ' fav-btn--compact' : '') + (on ? ' is-on' : ''),
+      'aria-pressed': on ? 'true' : 'false',
+      'aria-label': (on ? 'Прибрати з обраних: ' : 'Додати в обране: ') + item.name,
+      title: on ? 'Прибрати з обраних' : 'Додати в обране'
+    });
+    btn.appendChild(el('span', { 'aria-hidden': 'true', text: on ? '★' : '☆' }));
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var nowOn = toggleFav(item.name);
+      btn.classList.toggle('is-on', nowOn);
+      btn.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
+      btn.setAttribute('aria-label', (nowOn ? 'Прибрати з обраних: ' : 'Додати в обране: ') + item.name);
+      btn.setAttribute('title', nowOn ? 'Прибрати з обраних' : 'Додати в обране');
+      var span = btn.firstChild;
+      if (span) span.textContent = nowOn ? '★' : '☆';
+      /* Якщо ми у favOnly-режимі, треба прибрати картку з сітки.
+         У будь-якому випадку оновлюємо лічильник у toolbar. */
+      if (state.favOnly) renderCards();
+      else updateFavToggleUI();
+    });
+    return btn;
+  }
+
+  // -------------------------------------------------------------------------
+  // Loading skeleton — показуємо до того, як завантажиться software.json
+  // -------------------------------------------------------------------------
+  function buildSkeletonCard() {
+    var card = el('div', { class: 'card card--skeleton', 'aria-hidden': 'true' });
+    card.appendChild(el('div', { class: 'sk-line sk-line--title' }));
+    card.appendChild(el('div', { class: 'sk-line sk-line--cat' }));
+    card.appendChild(el('div', { class: 'sk-line sk-line--text' }));
+    card.appendChild(el('div', { class: 'sk-line sk-line--text sk-line--text-2' }));
+    var skTags = el('div', { class: 'sk-tags' });
+    for (var i = 0; i < 3; i++) skTags.appendChild(el('div', { class: 'sk-tag' }));
+    card.appendChild(skTags);
+    var skActions = el('div', { class: 'sk-actions' });
+    skActions.appendChild(el('div', { class: 'sk-btn' }));
+    skActions.appendChild(el('div', { class: 'sk-btn sk-btn--ghost' }));
+    card.appendChild(skActions);
+    return card;
+  }
+
+  function renderSkeletons(n) {
+    var host = document.getElementById('cards');
+    if (!host) return;
+    while (host.firstChild) host.removeChild(host.firstChild);
+    var counter = document.getElementById('results-count');
+    if (counter) counter.textContent = 'Завантаження…';
+    var emptyState = document.getElementById('empty-state');
+    if (emptyState) emptyState.hidden = true;
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < n; i++) frag.appendChild(buildSkeletonCard());
+    host.appendChild(frag);
+  }
+
+  // -------------------------------------------------------------------------
+  // Card modal (<dialog>)
+  // -------------------------------------------------------------------------
+  /* Тримаємо посилання на елемент, щоб не шукати його знову при кожному відкритті,
+     і не падати, якщо HTML без діалогу (наприклад, у тестовому стуб-середовищі). */
+  var modalEl = null;
+  /* Куди повертати фокус після закриття. */
+  var modalReturnFocus = null;
+
+  function getModal() {
+    if (!modalEl) modalEl = document.getElementById('card-modal');
+    return modalEl;
+  }
+
+  function clearChildren(node) {
+    if (!node) return;
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function openCardModal(item, slug) {
+    var modal = getModal();
+    if (!modal) return;
+    modalReturnFocus = document.activeElement;
+
+    var titleEl = document.getElementById('modal-title');
+    var metaEl = document.getElementById('modal-meta');
+    var descEl = document.getElementById('modal-description');
+    var tagsEl = document.getElementById('modal-tags');
+    var actionsEl = document.getElementById('modal-actions');
+
+    if (titleEl) {
+      clearChildren(titleEl);
+      titleEl.appendChild(document.createTextNode(String(item.name || '')));
+    }
+
+    if (metaEl) {
+      clearChildren(metaEl);
+      if (item.category) {
+        metaEl.appendChild(el('span', { class: 'card-category', text: item.category }));
+      }
+      metaEl.appendChild(buildFavButton(item, { compact: false }));
+      var permalink = el('a', {
+        class: 'modal-permalink',
+        href: '#card-' + slug,
+        title: 'Прямий лінк',
+        'aria-label': 'Прямий лінк на ' + item.name
+      });
+      permalink.appendChild(el('span', { 'aria-hidden': 'true', text: '#' }));
+      permalink.appendChild(document.createTextNode(' permalink'));
+      metaEl.appendChild(permalink);
+    }
+
+    if (descEl) {
+      clearChildren(descEl);
+      descEl.appendChild(document.createTextNode(String(item.description || '')));
+    }
+
+    if (tagsEl) {
+      clearChildren(tagsEl);
+      if (Array.isArray(item.tags) && item.tags.length) {
+        item.tags.forEach(function (t) {
+          var kind = tagKind(t);
+          var icon = tagOsIcon(t);
+          var attrs = { class: 'tag tag--static' };
+          if (kind) attrs['data-kind'] = kind;
+          var span = el('span', attrs);
+          if (icon) span.appendChild(el('span', { class: 'tag-icon', 'aria-hidden': 'true', text: icon }));
+          span.appendChild(document.createTextNode(t));
+          tagsEl.appendChild(span);
+        });
+      }
+    }
+
+    if (actionsEl) {
+      clearChildren(actionsEl);
+      var dl = safeUrl(item.download);
+      if (dl) {
+        actionsEl.appendChild(el('a', {
+          class: 'btn btn--primary',
+          href: dl,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: 'Завантажити'
+        }));
+      }
+      var web = safeUrl(item.website);
+      if (web && web !== dl) {
+        actionsEl.appendChild(el('a', {
+          class: 'btn',
+          href: web,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: 'Офіційний сайт'
+        }));
+      }
+      var guide = safeUrl(item.guide);
+      if (guide) {
+        actionsEl.appendChild(el('a', {
+          class: 'btn',
+          href: guide,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: 'Інструкція'
+        }));
+      }
+    }
+
+    /* Native <dialog> — тримає focus trap, Esc, inert background.
+       Якщо браузер старий і showModal не підтримується — open + ручний фокус. */
+    if (typeof modal.showModal === 'function' && !modal.open) {
+      try { modal.showModal(); }
+      catch (e) { modal.setAttribute('open', ''); }
+    } else if (!modal.hasAttribute('open')) {
+      modal.setAttribute('open', '');
+    }
+    var closeBtn = document.getElementById('modal-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeCardModal() {
+    var modal = getModal();
+    if (!modal) return;
+    if (typeof modal.close === 'function' && modal.open) {
+      try { modal.close(); }
+      catch (e) { modal.removeAttribute('open'); }
+    } else {
+      modal.removeAttribute('open');
+    }
+    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') {
+      try { modalReturnFocus.focus(); } catch (e) { /* ignore */ }
+    }
+    modalReturnFocus = null;
+  }
+
+  /** Прив'язує кнопку закриття + клік-на-бекдроп + close-event для <dialog>. */
+  function bindModal() {
+    var modal = getModal();
+    if (!modal) return;
+    var closeBtn = document.getElementById('modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeCardModal);
+    /* Клік на бекдроп: <dialog>::backdrop отримує події на самому dialog,
+       а внутрішній .modal-card — ні. Тож event.target === dialog → це бекдроп. */
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeCardModal();
+    });
+    /* Native cancel (Esc) → закриваємо чисто, щоб повернути фокус. */
+    modal.addEventListener('cancel', function (e) {
+      e.preventDefault();
+      closeCardModal();
+    });
+  }
+
   function buildCard(item, slug) {
     var card = el('article', { class: 'card', id: 'card-' + slug });
 
     var head = el('div', { class: 'card-head' });
+
+    /* Заголовок-кнопка: клік відкриває модалку з повними деталями.
+       <h2> залишається для семантики/SEO, <button> усередині — для активації. */
     var title = el('h2', { class: 'card-title' });
-    appendHighlighted(title, item.name, state.query);
+    var titleBtn = el('button', {
+      type: 'button',
+      class: 'card-title-btn',
+      'aria-haspopup': 'dialog',
+      'aria-label': 'Деталі: ' + item.name
+    });
+    appendHighlighted(titleBtn, item.name, state.query);
+    titleBtn.addEventListener('click', function () { openCardModal(item, slug); });
+    title.appendChild(titleBtn);
     head.appendChild(title);
+
+    var meta = el('div', { class: 'card-head-meta' });
     if (item.category) {
-      head.appendChild(el('span', { class: 'card-category', text: item.category }));
+      meta.appendChild(el('span', { class: 'card-category', text: item.category }));
     }
+
+    /* ★ — toggle "обране". Перемикає клас + перемальовує картки, якщо
+       активний favOnly-фільтр (інакше натиснута зірка не зникає миттєво). */
+    var favBtn = buildFavButton(item, { compact: true });
+    meta.appendChild(favBtn);
+
     /* Прямий лінк на картку: натискання змінює hash, правий клік → копіювати лінк. */
     var permalink = el('a', {
       class: 'card-permalink',
@@ -456,7 +752,9 @@
       'aria-label': 'Прямий лінк на ' + item.name
     });
     permalink.appendChild(el('span', { 'aria-hidden': 'true', text: '#' }));
-    head.appendChild(permalink);
+    meta.appendChild(permalink);
+
+    head.appendChild(meta);
     card.appendChild(head);
 
     if (item.description) {
@@ -584,6 +882,7 @@
     var filtered = ALL.filter(function (item) {
       if (state.category !== 'Усі' && item.category !== state.category) return false;
       if (!matchesOS(item, state.osFilter)) return false;
+      if (state.favOnly && !isFav(item.name)) return false;
       return matchesQuery(item, state.query);
     });
 
@@ -610,12 +909,14 @@
     }
 
     updateResetVisibility();
+    updateFavToggleUI();
     updateDocumentTitle(filtered.length);
   }
 
   /** Динамічний <title> з активних фільтрів — для шарингу/закладок. */
   function updateDocumentTitle(count) {
     var parts = [];
+    if (state.favOnly) parts.push('обране');
     if (state.category && state.category !== 'Усі') parts.push(state.category);
     if (state.query) parts.push('пошук: «' + state.query + '»');
     if (state.osFilter && state.osFilter.length) parts.push('ОС: ' + state.osFilter.join('+'));
@@ -700,7 +1001,8 @@
       state.query ||
       (state.category && state.category !== 'Усі') ||
       (state.osFilter && state.osFilter.length) ||
-      (state.sort && state.sort !== DEFAULT_SORT)
+      (state.sort && state.sort !== DEFAULT_SORT) ||
+      state.favOnly
     );
   }
 
@@ -708,6 +1010,21 @@
     var btn = document.getElementById('reset-filters');
     if (!btn) return;
     btn.hidden = !hasActiveFilters();
+  }
+
+  /** Синхронізує стан кнопки "Тільки обране" з state + лічильником. */
+  function updateFavToggleUI() {
+    var btn = document.getElementById('fav-toggle');
+    if (!btn) return;
+    var icon = btn.querySelector('.fav-toggle-icon');
+    var counter = document.getElementById('fav-count');
+    btn.setAttribute('aria-pressed', state.favOnly ? 'true' : 'false');
+    btn.classList.toggle('is-active', state.favOnly);
+    if (icon) icon.textContent = state.favOnly ? '★' : '☆';
+    if (counter) {
+      var n = favCountInCatalog();
+      counter.textContent = n ? '(' + n + ')' : '';
+    }
   }
 
   function bindFilters() {
@@ -739,6 +1056,15 @@
       });
     }
 
+    var favToggle = document.getElementById('fav-toggle');
+    if (favToggle) {
+      favToggle.addEventListener('click', function () {
+        state.favOnly = !state.favOnly;
+        renderCards();
+        writeURLState();
+      });
+    }
+
     var resetBtn = document.getElementById('reset-filters');
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
@@ -746,6 +1072,7 @@
         state.category = 'Усі';
         state.osFilter = [];
         state.sort = DEFAULT_SORT;
+        state.favOnly = false;
 
         var input = document.getElementById('search');
         if (input) input.value = '';
@@ -838,6 +1165,14 @@
       })
       .catch(function (err) {
         if (window && window.console) console.error('[software-hub] failed to load data', err);
+        /* Прибираємо скелетони — інакше вони триватимуть нескінченну анімацію
+           поверх повідомлення про помилку. */
+        var host = document.getElementById('cards');
+        if (host) {
+          while (host.firstChild) host.removeChild(host.firstChild);
+        }
+        var counter = document.getElementById('results-count');
+        if (counter) counter.textContent = '';
         showError();
       });
   }
@@ -859,11 +1194,16 @@
 
   function init() {
     readURLState();
+    loadFavorites();
     initTheme();
     bindSearch();
     bindFilters();
     bindHotkeys();
     bindHashChange();
+    bindModal();
+    /* Скелетон до старту fetch — позбавляємось від layout-shift і даємо
+       зрозуміти користувачу, що сайт живий навіть на повільній мережі. */
+    renderSkeletons(6);
     loadData();
     registerServiceWorker();
   }
