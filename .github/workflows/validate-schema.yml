@@ -2,16 +2,9 @@ name: Validate software.json
 
 on:
   pull_request:
-    paths:
-      - 'software.json'
-      - '.schema/software.schema.json'
-      - '.github/workflows/validate-schema.yml'
   push:
     branches: [main]
-    paths:
-      - 'software.json'
-      - '.schema/software.schema.json'
-      - '.github/workflows/validate-schema.yml'
+  workflow_dispatch:
 
 jobs:
   validate:
