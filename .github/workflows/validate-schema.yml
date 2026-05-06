@@ -46,4 +46,43 @@ jobs:
               print(f"FAIL  duplicate name(s) in software.json: {', '.join(duplicates)}")
               sys.exit(1)
           print(f"OK    no duplicate names")
+
+          # Slug-collision guard: дзеркалить slugify() з app.js. Колізія базових
+          # slug-ів = ризик того, що hash permalink (#card-<slug>) вкаже на іншу
+          # картку при майбутньому додаванні даних. CI має ловити ДО мерджу.
+          UA_TRANSLIT = {
+              'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie',
+              'ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l',
+              'м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u',
+              'ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'',
+              'ю':'iu','я':'ia',"'":'',
+              'ё':'e','ы':'y','э':'e','ъ':''
+          }
+          import re
+          def slugify(s: str) -> str:
+              out = []
+              for ch in s.lower():
+                  if ch in UA_TRANSLIT:
+                      out.append(UA_TRANSLIT[ch])
+                  elif ch == '+':
+                      out.append('-plus')
+                  elif ch == '#':
+                      out.append('-sharp')
+                  else:
+                      out.append(ch)
+              s2 = re.sub(r'[^a-z0-9]+', '-', ''.join(out)).strip('-')
+              return s2 or 'item'
+
+          slug_to_names = {}
+          for n in names:
+              s = slugify(n)
+              slug_to_names.setdefault(s, []).append(n)
+          collisions = {s: ns for s, ns in slug_to_names.items() if len(ns) > 1}
+          if collisions:
+              for s, ns in sorted(collisions.items()):
+                  print(f"FAIL  slug collision '{s}' from: {', '.join(ns)}")
+              print("      Slug collisions silently break #card-<slug> permalinks.")
+              print("      Rename one of the colliding programs.")
+              sys.exit(1)
+          print(f"OK    no slug collisions ({len(slug_to_names)} unique slugs)")
           PY
