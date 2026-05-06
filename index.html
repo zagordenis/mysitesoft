@@ -52,6 +52,26 @@
         <span class="results-count" id="results-count" aria-live="polite" aria-atomic="true"></span>
       </div>
 
+      <div class="filters-row">
+        <label class="filter-field">
+          <span class="filter-field-label">Сортувати:</span>
+          <select id="sort-select" class="select">
+            <option value="name">за назвою</option>
+            <option value="category">за категорією</option>
+          </select>
+        </label>
+
+        <fieldset class="os-filter">
+          <legend class="filter-field-label">ОС:</legend>
+          <label class="os-check"><input type="checkbox" name="os" value="Windows" /><span>Windows</span></label>
+          <label class="os-check"><input type="checkbox" name="os" value="Linux" /><span>Linux</span></label>
+          <label class="os-check"><input type="checkbox" name="os" value="macOS" /><span>macOS</span></label>
+          <label class="os-check"><input type="checkbox" name="os" value="Android" /><span>Android</span></label>
+        </fieldset>
+
+        <button id="reset-filters" class="btn btn--ghost" type="button" hidden>Скинути фільтри</button>
+      </div>
+
       <div id="categories" class="categories" role="toolbar" aria-label="Фільтри категорій"></div>
     </section>
 
