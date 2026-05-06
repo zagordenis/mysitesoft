@@ -28,7 +28,8 @@ software-hub/
 ├── .github/
 │   ├── workflows/
 │   │   ├── pages.yml             # авто-деплой на GitHub Pages
-│   │   └── validate-schema.yml   # CI-валідація software.json
+│   │   ├── validate-schema.yml   # CI-валідація software.json
+│   │   └── link-check.yml        # cron-перевірка посилань (lychee)
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   └── ISSUE_TEMPLATE/
 └── assets/
@@ -178,6 +179,18 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Для HTTPS використайте [Certbot](https://certbot.eff.org/) або власні сертифікати.
+
+## Перевірка мертвих посилань
+
+`software.json` стрімко старіє — посилання на офіційні сторінки змінюються частіше, ніж здається. Workflow `.github/workflows/link-check.yml` автоматично перевіряє всі URL з полів `download` / `website` / `guide` через [lychee](https://github.com/lycheeverse/lychee):
+
+- щотижня: понеділок 09:00 UTC,
+- при пуші в `main`, що зачіпає `software.json`,
+- вручну з вкладки **Actions → Link checker → Run workflow**.
+
+Коли знайдено биті посилання, workflow автоматично відкриває issue з міткою `broken-link` та повним звітом. Звіт також зберігається як артефакт `lychee-report` (30 днів).
+
+Виключення зі статусів-«ок»: `200..=299`, `403` (часто Cloudflare-bot-protection на офіційних завантаженнях), `429` (rate-limit). Все інше (404, 410, 5xx, timeout) трактується як збій.
 
 ## Безпека та принципи
 
