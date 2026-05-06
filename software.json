@@ -266,7 +266,7 @@
     "description": "Офіційний набір утиліт від Microsoft: FancyZones, PowerRename, ColorPicker, Run-launcher та інші.",
     "download": "https://learn.microsoft.com/windows/powertoys/install",
     "website": "https://learn.microsoft.com/windows/powertoys/",
-    "guide": "https://learn.microsoft.com/windows/powertoys/",
+    "guide": "",
     "tags": [
       "Windows",
       "Free",
@@ -297,7 +297,7 @@
     "category": "Утиліти",
     "description": "Створення завантажувальних USB-носіїв з ISO-образів Windows / Linux. Маленький, портативний, без реклами.",
     "download": "https://rufus.ie/",
-    "website": "https://rufus.ie/",
+    "website": "",
     "guide": "",
     "tags": [
       "Windows",
