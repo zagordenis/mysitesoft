@@ -6,7 +6,13 @@
     "download": "https://www.7-zip.org/download.html",
     "website": "https://www.7-zip.org/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Archive"],
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Archive"
+    ],
     "license": "open-source",
     "lastChecked": "2026-05-03"
   },
@@ -17,7 +23,11 @@
     "download": "https://www.win-rar.com/download.html",
     "website": "https://www.win-rar.com/",
     "guide": "",
-    "tags": ["Windows", "Trial", "Archive"],
+    "tags": [
+      "Windows",
+      "Trial",
+      "Archive"
+    ],
     "license": "trial",
     "lastChecked": "2026-05-03"
   },
@@ -28,7 +38,13 @@
     "download": "https://discord.com/download",
     "website": "https://discord.com/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Chat", "Voice"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Chat",
+      "Voice"
+    ]
   },
   {
     "name": "Steam",
@@ -37,7 +53,13 @@
     "download": "https://store.steampowered.com/about/",
     "website": "https://store.steampowered.com/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Launcher", "Games"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Launcher",
+      "Games"
+    ]
   },
   {
     "name": "Telegram Desktop",
@@ -46,7 +68,13 @@
     "download": "https://desktop.telegram.org/",
     "website": "https://telegram.org/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Chat"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Chat"
+    ]
   },
   {
     "name": "Google Chrome",
@@ -55,7 +83,12 @@
     "download": "https://www.google.com/chrome/",
     "website": "",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Browser"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Browser"
+    ]
   },
   {
     "name": "Mozilla Firefox",
@@ -64,7 +97,14 @@
     "download": "https://www.mozilla.org/firefox/new/",
     "website": "https://www.mozilla.org/firefox/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Browser", "Privacy"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Browser",
+      "Privacy"
+    ]
   },
   {
     "name": "VLC Media Player",
@@ -73,7 +113,13 @@
     "download": "https://www.videolan.org/vlc/",
     "website": "https://www.videolan.org/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Media"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Media"
+    ]
   },
   {
     "name": "OBS Studio",
@@ -82,7 +128,14 @@
     "download": "https://obsproject.com/download",
     "website": "https://obsproject.com/",
     "guide": "https://obsproject.com/wiki/",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Streaming", "Recording"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Streaming",
+      "Recording"
+    ]
   },
   {
     "name": "Visual Studio Code",
@@ -91,7 +144,13 @@
     "download": "https://code.visualstudio.com/Download",
     "website": "https://code.visualstudio.com/",
     "guide": "https://code.visualstudio.com/docs",
-    "tags": ["Windows", "Linux", "Free", "Editor", "IDE"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Editor",
+      "IDE"
+    ]
   },
   {
     "name": "Git",
@@ -100,7 +159,14 @@
     "download": "https://git-scm.com/downloads",
     "website": "https://git-scm.com/",
     "guide": "https://git-scm.com/doc",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "VCS", "CLI"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "VCS",
+      "CLI"
+    ]
   },
   {
     "name": "Notepad++",
@@ -109,7 +175,12 @@
     "download": "https://notepad-plus-plus.org/downloads/",
     "website": "https://notepad-plus-plus.org/",
     "guide": "",
-    "tags": ["Windows", "Free", "Open Source", "Editor"]
+    "tags": [
+      "Windows",
+      "Free",
+      "Open Source",
+      "Editor"
+    ]
   },
   {
     "name": "NVIDIA App",
@@ -118,7 +189,13 @@
     "download": "https://www.nvidia.com/en-us/software/nvidia-app/",
     "website": "https://www.nvidia.com/",
     "guide": "",
-    "tags": ["Windows", "Free", "Driver", "GPU", "NVIDIA"]
+    "tags": [
+      "Windows",
+      "Free",
+      "Driver",
+      "GPU",
+      "NVIDIA"
+    ]
   },
   {
     "name": "AMD Software: Adrenalin Edition",
@@ -127,7 +204,13 @@
     "download": "https://www.amd.com/en/support",
     "website": "https://www.amd.com/",
     "guide": "",
-    "tags": ["Windows", "Free", "Driver", "GPU", "AMD"]
+    "tags": [
+      "Windows",
+      "Free",
+      "Driver",
+      "GPU",
+      "AMD"
+    ]
   },
   {
     "name": "qBittorrent",
@@ -136,7 +219,13 @@
     "download": "https://www.qbittorrent.org/download",
     "website": "https://www.qbittorrent.org/",
     "guide": "",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Torrent"]
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Torrent"
+    ]
   },
   {
     "name": "Bitwarden",
@@ -145,7 +234,14 @@
     "download": "https://bitwarden.com/download/",
     "website": "https://bitwarden.com/",
     "guide": "https://bitwarden.com/help/",
-    "tags": ["Windows", "Linux", "Free", "Open Source", "Security", "Passwords"],
+    "tags": [
+      "Windows",
+      "Linux",
+      "Free",
+      "Open Source",
+      "Security",
+      "Passwords"
+    ],
     "license": "open-source",
     "lastChecked": "2026-05-03"
   },
@@ -156,6 +252,336 @@
     "download": "https://www.malwarebytes.com/mwb-download",
     "website": "https://www.malwarebytes.com/",
     "guide": "",
-    "tags": ["Windows", "Free", "Trial", "Security", "Antivirus"]
+    "tags": [
+      "Windows",
+      "Free",
+      "Trial",
+      "Security",
+      "Antivirus"
+    ]
+  },
+  {
+    "name": "PowerToys",
+    "category": "Утиліти",
+    "description": "Офіційний набір утиліт від Microsoft: FancyZones, PowerRename, ColorPicker, Run-launcher та інші.",
+    "download": "https://learn.microsoft.com/windows/powertoys/install",
+    "website": "https://learn.microsoft.com/windows/powertoys/",
+    "guide": "https://learn.microsoft.com/windows/powertoys/",
+    "tags": [
+      "Windows",
+      "Free",
+      "Open Source",
+      "Productivity"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Everything",
+    "category": "Утиліти",
+    "description": "Миттєвий пошук файлів і тек на NTFS-розділах за іменем. Працює швидше, ніж вбудований Windows-пошук.",
+    "download": "https://www.voidtools.com/downloads/",
+    "website": "https://www.voidtools.com/",
+    "guide": "",
+    "tags": [
+      "Windows",
+      "Free",
+      "Search",
+      "Files"
+    ],
+    "license": "free",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Rufus",
+    "category": "Утиліти",
+    "description": "Створення завантажувальних USB-носіїв з ISO-образів Windows / Linux. Маленький, портативний, без реклами.",
+    "download": "https://rufus.ie/",
+    "website": "https://rufus.ie/",
+    "guide": "",
+    "tags": [
+      "Windows",
+      "Free",
+      "Open Source",
+      "USB",
+      "ISO"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "ShareX",
+    "category": "Утиліти",
+    "description": "Розширений інструмент для скріншотів і запису екрана з гарячими клавішами, OCR і автозалитом у хмару.",
+    "download": "https://getsharex.com/downloads/",
+    "website": "https://getsharex.com/",
+    "guide": "",
+    "tags": [
+      "Windows",
+      "Free",
+      "Open Source",
+      "Screenshot",
+      "Recording"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Total Commander",
+    "category": "Утиліти",
+    "description": "Двопанельний файловий менеджер з потужним пошуком, FTP, архіваторами та плагінами.",
+    "download": "https://www.ghisler.com/download.htm",
+    "website": "https://www.ghisler.com/",
+    "guide": "",
+    "tags": [
+      "Windows",
+      "Trial",
+      "Files"
+    ],
+    "license": "trial",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "KeePassXC",
+    "category": "Безпека",
+    "description": "Локальний менеджер паролів з відкритим кодом. База — звичайний файл .kdbx, синхронізується через будь-яку хмару.",
+    "download": "https://keepassxc.org/download/",
+    "website": "https://keepassxc.org/",
+    "guide": "https://keepassxc.org/docs/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Security",
+      "Passwords"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Tor Browser",
+    "category": "Безпека",
+    "description": "Браузер на базі Firefox для анонімного перегляду через мережу Tor. Шифрує трафік і приховує реальний IP.",
+    "download": "https://www.torproject.org/download/",
+    "website": "https://www.torproject.org/",
+    "guide": "https://support.torproject.org/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Android",
+      "Free",
+      "Open Source",
+      "Browser",
+      "Privacy"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Wireshark",
+    "category": "Безпека",
+    "description": "Класичний аналізатор мережевих пакетів для діагностики, навчання і пошуку проблем у трафіку.",
+    "download": "https://www.wireshark.org/download.html",
+    "website": "https://www.wireshark.org/",
+    "guide": "https://www.wireshark.org/docs/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Network"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Docker Desktop",
+    "category": "Розробка",
+    "description": "Локальний Docker-рантайм з GUI: контейнери, образи, Compose, Kubernetes для розробки.",
+    "download": "https://www.docker.com/products/docker-desktop/",
+    "website": "https://www.docker.com/",
+    "guide": "https://docs.docker.com/desktop/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Containers"
+    ],
+    "license": "freemium",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Postman",
+    "category": "Розробка",
+    "description": "Клієнт для тестування HTTP/REST API: колекції, змінні середовища, моки, автотести.",
+    "download": "https://www.postman.com/downloads/",
+    "website": "https://www.postman.com/",
+    "guide": "https://learning.postman.com/docs/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "API",
+      "HTTP"
+    ],
+    "license": "freemium",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "RetroArch",
+    "category": "Емулятори",
+    "description": "Frontend для десятків ретро-емуляторів (NES, SNES, PSX, GBA та ін.) з єдиним інтерфейсом і shader-підтримкою.",
+    "download": "https://www.retroarch.com/?page=platforms",
+    "website": "https://www.retroarch.com/",
+    "guide": "https://docs.libretro.com/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Android",
+      "Free",
+      "Open Source",
+      "Emulator",
+      "Retro"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "PCSX2",
+    "category": "Емулятори",
+    "description": "Емулятор PlayStation 2 з відкритим кодом. Висока сумісність, рендеринг у HD/4K, save states.",
+    "download": "https://pcsx2.net/downloads/",
+    "website": "https://pcsx2.net/",
+    "guide": "https://pcsx2.net/docs/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Emulator",
+      "PlayStation"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Dolphin Emulator",
+    "category": "Емулятори",
+    "description": "Емулятор GameCube і Wii з відкритим кодом. Рендеринг у HD, мережева гра, контролери.",
+    "download": "https://dolphin-emu.org/download/",
+    "website": "https://dolphin-emu.org/",
+    "guide": "https://dolphin-emu.org/docs/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Android",
+      "Free",
+      "Open Source",
+      "Emulator"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "GIMP",
+    "category": "Дизайн",
+    "description": "Растровий графічний редактор з відкритим кодом. Альтернатива Photoshop для фотомонтажу і ретуші.",
+    "download": "https://www.gimp.org/downloads/",
+    "website": "https://www.gimp.org/",
+    "guide": "https://docs.gimp.org/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Image",
+      "Editor"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Inkscape",
+    "category": "Дизайн",
+    "description": "Векторний редактор з відкритим кодом. SVG, експорт у PNG/PDF, плагіни, фігури, шари.",
+    "download": "https://inkscape.org/release/",
+    "website": "https://inkscape.org/",
+    "guide": "https://inkscape.org/learn/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Vector",
+      "Editor"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "Krita",
+    "category": "Дизайн",
+    "description": "Растровий редактор для художників з потужними пензлями, animation timeline і стабілізацією штриха.",
+    "download": "https://krita.org/download/",
+    "website": "https://krita.org/",
+    "guide": "https://docs.krita.org/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Image",
+      "Drawing"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "LibreOffice",
+    "category": "Офіс",
+    "description": "Безкоштовний офісний пакет: текст, таблиці, презентації, формули. Сумісний з Microsoft Office формати.",
+    "download": "https://www.libreoffice.org/download/download/",
+    "website": "https://www.libreoffice.org/",
+    "guide": "https://www.libreoffice.org/get-help/documentation/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Office"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
+  },
+  {
+    "name": "ONLYOFFICE Desktop Editors",
+    "category": "Офіс",
+    "description": "Офісний пакет з відкритим кодом і добрим OOXML-сумісним рендером. Документи, таблиці, презентації, форми.",
+    "download": "https://www.onlyoffice.com/download-desktop.aspx",
+    "website": "https://www.onlyoffice.com/",
+    "guide": "https://helpcenter.onlyoffice.com/",
+    "tags": [
+      "Windows",
+      "Linux",
+      "macOS",
+      "Free",
+      "Open Source",
+      "Office"
+    ],
+    "license": "open-source",
+    "lastChecked": "2026-05-03"
   }
 ]
