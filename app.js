@@ -582,7 +582,8 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
-  function openCardModal(item, slug) {
+  function openCardModal(item) {
+    var slug = item._slug;
     var modal = getModal();
     if (!modal) return;
     modalReturnFocus = document.activeElement;
@@ -715,7 +716,8 @@
     });
   }
 
-  function buildCard(item, slug) {
+  function buildCard(item) {
+    var slug = item._slug;
     var card = el('article', { class: 'card', id: 'card-' + slug });
 
     var head = el('div', { class: 'card-head' });
@@ -730,7 +732,7 @@
       'aria-label': 'Деталі: ' + item.name
     });
     appendHighlighted(titleBtn, item.name, state.query);
-    titleBtn.addEventListener('click', function () { openCardModal(item, slug); });
+    titleBtn.addEventListener('click', function () { openCardModal(item); });
     title.appendChild(titleBtn);
     head.appendChild(title);
 
@@ -893,12 +895,11 @@
     } else {
       if (emptyState) emptyState.hidden = true;
       var frag = document.createDocumentFragment();
-      var allocSlug = makeSlugAllocator();
       filtered
         .slice()
         .sort(function (a, b) { return compareCards(a, b, state.sort); })
         .forEach(function (item) {
-          frag.appendChild(buildCard(item, allocSlug(item.name)));
+          frag.appendChild(buildCard(item));
         });
       host.appendChild(frag);
     }
@@ -1149,6 +1150,15 @@
         ALL = data.filter(function (x) {
           return x && typeof x === 'object' && typeof x.name === 'string';
         });
+        /* Стабільні slug-и: обчислюємо один раз після завантаження, у
+           фіксованому порядку (alpha-sort за name). Так id картки і hash
+           permalink не змінюються при зміні фільтрів / сортування. */
+        var allocSlug = makeSlugAllocator();
+        ALL.slice()
+          .sort(function (a, b) {
+            return String(a.name || '').localeCompare(String(b.name || ''), 'uk');
+          })
+          .forEach(function (it) { it._slug = allocSlug(it.name); });
         var cats = [];
         var seen = Object.create(null);
         ALL.forEach(function (it) {
